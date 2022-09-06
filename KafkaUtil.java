@@ -24,7 +24,8 @@ public class KafkaUtil {
     private static HashMap<String, KafkaProducer<String, String>> kafkaProducerMap = new HashMap<>();
     private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
     //topic列表
-    public static List kafkaListTopics() throws ExecutionException, InterruptedException {
+    public static List<String> kafkaListTopics() throws ExecutionException, InterruptedException {
+
         Properties props = new Properties();
         // 只需要提供一个或多个 broker 的 IP 和端口
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
@@ -36,7 +37,7 @@ public class KafkaUtil {
         System.out.println(topics);
         System.out.println("=======================");
 
-        List topicList = new ArrayList();
+        List<String> topicList = new ArrayList<String>();
         topicList.addAll(topics);
 
         return topicList;
@@ -257,7 +258,7 @@ public class KafkaUtil {
 
 
     //按groupId消费指定topic的数据
-    public static ArrayList recvFromKafka(String topic, String groupId) throws ExecutionException, InterruptedException {
+    public static ArrayList<LinkedHashMap<String, Object>> recvFromKafka(String topic, String groupId) throws ExecutionException, InterruptedException {
 
         KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
@@ -272,7 +273,8 @@ public class KafkaUtil {
         System.out.println("consumerRecords = " + consumerRecords.count());
 
         for (ConsumerRecord<String, String> record : consumerRecords) {
-            Map data = new HashMap<>();
+            LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
+
             data.put("订阅主题", record.topic());
             data.put("消息键值", record.key());
             data.put("消息内容", record.value());
@@ -290,7 +292,7 @@ public class KafkaUtil {
 
 
     //消费指定topic指定partition对应的offset数据
-    public static ArrayList recvFromKafkaByOffset(String topic, String groupId,int partition,long offset) throws ExecutionException, InterruptedException {
+    public static ArrayList<LinkedHashMap<String, Object>> recvFromKafkaByOffset(String topic, String groupId,int partition,long offset) throws ExecutionException, InterruptedException {
 
         KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
@@ -316,7 +318,7 @@ public class KafkaUtil {
         System.out.println("consumerRecords = " + consumerRecords.count());
 
         for (ConsumerRecord<String, String> record : consumerRecords) {
-            Map data = new HashMap<>();
+            LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
             data.put("订阅主题", record.topic());
             data.put("消息键值", record.key());
             data.put("消息内容", record.value());
@@ -333,7 +335,7 @@ public class KafkaUtil {
     }
 
     //消费指定topic指定partition对应的timestamp以后的数据
-    public static ArrayList recvFromKafkaByTimestamp(String topic, String groupId,int partition,long timestamp) throws ExecutionException, InterruptedException {
+    public static ArrayList<LinkedHashMap<String, Object>> recvFromKafkaByTimestamp(String topic, String groupId,int partition,long timestamp) throws ExecutionException, InterruptedException {
 
         KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
@@ -365,7 +367,7 @@ public class KafkaUtil {
         System.out.println("consumerRecords = " + consumerRecords.count());
 
         for (ConsumerRecord<String, String> record : consumerRecords) {
-            Map data = new HashMap<>();
+            LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
             data.put("订阅主题", record.topic());
             data.put("消息键值", record.key());
             data.put("消息内容", record.value());
@@ -510,7 +512,12 @@ public class KafkaUtil {
 
 
     public static void main(String[] args) throws ExecutionException, InterruptedException,TimeoutException {
-        //long start=System.currentTimeMillis();   //获取开始时间
+        long start=System.currentTimeMillis();   //获取开始时间
+
+        List list = KafkaUtil.kafkaListTopics();
+
+
+
         //resetOffsetToEarliest("RULEa93304e6d844000", "group1");
         //LinkedHashMap<String, Object> recordMeta = sendToKafka("RULEa93304e6d844000","222","aaaa");
         //JSONObject object = JSONUtil.parseObj(recordMeta);
