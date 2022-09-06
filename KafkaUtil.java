@@ -22,7 +22,7 @@ public class KafkaUtil {
 
     private static HashMap<String, KafkaConsumer<String, String>> kafkaConsumerMap = new HashMap<>();
     private static HashMap<String, KafkaProducer<String, String>> kafkaProducerMap = new HashMap<>();
-    private static String brokerList = "";
+    private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
     //topic列表
     public static List<String> kafkaListTopics() throws ExecutionException, InterruptedException {
 
@@ -274,18 +274,17 @@ public class KafkaUtil {
 
         for (ConsumerRecord<String, String> record : consumerRecords) {
             LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
-
-            data.put("订阅主题", record.topic());
-            data.put("消息键值", record.key());
-            data.put("消息内容", record.value());
-            data.put("消息内容的偏移量", record.offset());
-            data.put("消息内容分区", record.partition());
+            data.put("topic", record.topic());
+            data.put("key", record.key());
+            data.put("value", record.value());
+            data.put("partition", record.partition());
+            data.put("offset", record.offset());
             buffer.add(data);
-            System.out.println("topic=" + record.topic());
-            System.out.println("key=" + record.key());
-            System.out.println("value=" + record.value());
-            System.out.println("partition=" + record.partition());
-            System.out.println("offset=" + record.offset());
+            System.out.println("订阅主题=" + record.topic());
+            System.out.println("消息键值=" + record.key());
+            System.out.println("消息内容=" + record.value());
+            System.out.println("消息内容分区=" + record.partition());
+            System.out.println("消息内容的偏移量=" + record.offset());
         }
         return buffer;
     }
@@ -319,17 +318,17 @@ public class KafkaUtil {
 
         for (ConsumerRecord<String, String> record : consumerRecords) {
             LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
-            data.put("订阅主题", record.topic());
-            data.put("消息键值", record.key());
-            data.put("消息内容", record.value());
-            data.put("消息内容的偏移量", record.offset());
-            data.put("消息内容分区", record.partition());
+            data.put("topic", record.topic());
+            data.put("key", record.key());
+            data.put("value", record.value());
+            data.put("partition", record.partition());
+            data.put("offset", record.offset());
             buffer.add(data);
-            System.out.println("topic=" + record.topic());
-            System.out.println("key=" + record.key());
-            System.out.println("value=" + record.value());
-            System.out.println("partition=" + record.partition());
-            System.out.println("offset=" + record.offset());
+            System.out.println("订阅主题=" + record.topic());
+            System.out.println("消息键值=" + record.key());
+            System.out.println("消息内容=" + record.value());
+            System.out.println("消息内容分区=" + record.partition());
+            System.out.println("消息内容的偏移量=" + record.offset());
         }
         return buffer;
     }
@@ -368,17 +367,17 @@ public class KafkaUtil {
 
         for (ConsumerRecord<String, String> record : consumerRecords) {
             LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
-            data.put("订阅主题", record.topic());
-            data.put("消息键值", record.key());
-            data.put("消息内容", record.value());
-            data.put("消息内容的偏移量", record.offset());
-            data.put("消息内容分区", record.partition());
+            data.put("topic", record.topic());
+            data.put("key", record.key());
+            data.put("value", record.value());
+            data.put("partition", record.partition());
+            data.put("offset", record.offset());
             buffer.add(data);
-            System.out.println("topic=" + record.topic());
-            System.out.println("key=" + record.key());
-            System.out.println("value=" + record.value());
-            System.out.println("partition=" + record.partition());
-            System.out.println("offset=" + record.offset());
+            System.out.println("订阅主题=" + record.topic());
+            System.out.println("消息键值=" + record.key());
+            System.out.println("消息内容=" + record.value());
+            System.out.println("消息内容分区=" + record.partition());
+            System.out.println("消息内容的偏移量=" + record.offset());
         }
         return buffer;
     }
