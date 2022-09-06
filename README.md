@@ -9,10 +9,10 @@
 只需要集成1个KafkaUtil.java文件即可，修改里面的kafka服务地址即可
 
 ## 典型示例：
-1. **同步生产:** LinkedHashMap<String, Object> recordMeta = sendToKafka("RULEa93304e6d844000","222","aaaa");
-2. **异步生产:** sendToKafkaAsync("RULEa93304e6d844000", "222", "aaaa");
-3. **消费数据:** ArrayList<LinkedHashMap<String, Object>> buffer = recvFromKafka("RULEa93304e6d844000", "group1");
-4. **重置偏移:** resetOffsetToEarliest("RULEa93304e6d844000", "group1");
+1. **同步生产:** LinkedHashMap<String, Object> recordMeta = KafkaUtil.sendToKafka("RULEa93304e6d844000","222","aaaa");
+2. **异步生产:** KafkaUtil.sendToKafkaAsync("RULEa93304e6d844000", "222", "aaaa");
+3. **消费数据:** ArrayList<LinkedHashMap<String, Object>> buffer = KafkaUtil.recvFromKafka("RULEa93304e6d844000", "group1");
+4. **重置偏移:** KafkaUtil.resetOffsetToEarliest("RULEa93304e6d844000", "group1");
 
 
 ## 接口介绍：
