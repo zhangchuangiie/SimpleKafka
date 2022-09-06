@@ -10,8 +10,8 @@
 
 ## 接口介绍：
 1. **kafkaListTopics：** topic列表
-2. **kafkaConsumerGroups: ** 消费者列表
-3. **kafkaConsumerGroups：**指定topic的活跃消费者列表
+2. **kafkaConsumerGroups：** 消费者列表
+3. **kafkaConsumerGroups：** 指定topic的活跃消费者列表
 4. **sendToKafka：** 生产数据到指定的topic,同步接口
 5. **sendToKafkaAsync：** 生产数据到指定的topic，异步接口，默认回调
 6. **sendToKafkaAsync：** 生产数据到指定的topic，异步接口，自定义回调
@@ -24,7 +24,7 @@
 13. **consumerPositions：** 获取当前消费偏移量情况
 
 ## 接口列表：
-1. **kafkaListTopics：** List<String> kafkaListTopics()
+1. **kafkaListTopics:** List<String> kafkaListTopics()
 2. **kafkaConsumerGroups:** List<String> kafkaConsumerGroups()
 3. **kafkaConsumerGroups：** List<String> kafkaConsumerGroups(String topic)
 4. **sendToKafka：** LinkedHashMap<String, Object> sendToKafka(String topic, String key, String value)
