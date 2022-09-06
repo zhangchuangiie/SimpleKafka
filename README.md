@@ -10,7 +10,7 @@
 
 ## 接口介绍：
 1. **kafkaListTopics：** topic列表
-2. **kafkaConsumerGroups:** 消费者列表
+2. **kafkaConsumerGroups: ** 消费者列表
 3. **kafkaConsumerGroups：**指定topic的活跃消费者列表
 4. **sendToKafka：** 生产数据到指定的topic,同步接口
 5. **sendToKafkaAsync：** 生产数据到指定的topic，异步接口，默认回调
