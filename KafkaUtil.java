@@ -22,7 +22,7 @@ public class KafkaUtil {
 
     private static HashMap<String, KafkaConsumer<String, String>> kafkaConsumerMap = new HashMap<>();
     private static HashMap<String, KafkaProducer<String, String>> kafkaProducerMap = new HashMap<>();
-    private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
+    private static String brokerList = "";
     //topic列表
     public static List<String> kafkaListTopics() throws ExecutionException, InterruptedException {
 
