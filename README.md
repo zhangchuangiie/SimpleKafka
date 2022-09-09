@@ -58,10 +58,10 @@
 16. **resetOffsetToEarliest：** boolean resetOffsetToEarliest(String topic, String groupId)
 17. **resetOffsetToLatest：** boolean resetOffsetToLatest(String topic, String groupId)
 18. **consumerPositions：** List<LinkedHashMap<String, Object>> consumerPositions(String topic, String groupId)
-19. **topicSize：**List<LinkedHashMap<String, Object>> topicSize(String topic)
-20. **topicSizeAll：**LinkedHashMap<String, Object> topicSizeAll()
-21. **topicSizeStatistics：**LinkedHashMap<String, Object> topicSizeStatistics(String topic)
-22. **topicSizeStatisticsALL：**LinkedHashMap<String, Object> topicSizeStatisticsALL()
+19. **topicSize：** List<LinkedHashMap<String, Object>> topicSize(String topic)
+20. **topicSizeAll：** LinkedHashMap<String, Object> topicSizeAll()
+21. **topicSizeStatistics：** LinkedHashMap<String, Object> topicSizeStatistics(String topic)
+22. **topicSizeStatisticsALL：** LinkedHashMap<String, Object> topicSizeStatisticsALL()
 
 ## 联系人：
 有问题可以联系:zhangchuang@iie.ac.cn
