@@ -37,7 +37,7 @@
 19. **topicSize：** 获取指定topic数据量详情情况 {"partition": 0,"begin": 65,"end": 65,"size": 0}
 20. **topicSizeAll：** 获取所有topic数据量详情情况
 21. **topicSizeStatistics：** 获取指定topic数据量统计{"partitionNum":5452,"dataNum":41570647}
-22. **topicSizeStatisticsALL：** 获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
+22. **topicSizeStatisticsAll：** 获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
 
 ## 接口列表：
 1. **kafkaListTopics:** List<String> kafkaListTopics()
@@ -61,7 +61,7 @@
 19. **topicSize：** List<LinkedHashMap<String, Object>> topicSize(String topic)
 20. **topicSizeAll：** LinkedHashMap<String, Object> topicSizeAll()
 21. **topicSizeStatistics：** LinkedHashMap<String, Object> topicSizeStatistics(String topic)
-22. **topicSizeStatisticsALL：** LinkedHashMap<String, Object> topicSizeStatisticsALL()
+22. **topicSizeStatisticsAll：** LinkedHashMap<String, Object> topicSizeStatisticsALL()
 
 ## 联系人：
 有问题可以联系:zhangchuang@iie.ac.cn
