@@ -1,13 +1,14 @@
 package com.example.demo.util;
 
-import cn.hutool.json.JSONObject;
-import cn.hutool.json.JSONUtil;
 import com.alibaba.fastjson.JSON;
 import org.apache.kafka.clients.admin.*;
 import org.apache.kafka.clients.consumer.*;
 import org.apache.kafka.clients.producer.*;
+import org.apache.kafka.common.Node;
 import org.apache.kafka.common.PartitionInfo;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.TopicPartitionInfo;
+import org.apache.kafka.common.config.ConfigResource;
 import org.apache.kafka.common.serialization.StringDeserializer;
 
 import java.time.Duration;
@@ -17,12 +18,13 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class KafkaUtil {
 
     private static HashMap<String, KafkaConsumer<String, String>> kafkaConsumerMap = new HashMap<>();
     private static HashMap<String, KafkaProducer<String, String>> kafkaProducerMap = new HashMap<>();
-    private static String brokerList = "";
+    private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
     //topic列表
     public static List<String> kafkaListTopics() throws ExecutionException, InterruptedException {
 
@@ -39,9 +41,108 @@ public class KafkaUtil {
 
         List<String> topicList = new ArrayList<String>();
         topicList.addAll(topics);
-
+        client.close();
         return topicList;
     }
+
+    //topic创建
+    public static void createTopic(String topic) throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+        // 获取 topic 列表
+        NewTopic newTopic = new NewTopic(topic,4, (short)3);
+        client.createTopics(Arrays.asList(newTopic)).all().get();
+        System.out.println("=======================");
+
+        //System.out.println("CreateTopicsResult : " + createTopicsResult);
+        System.out.println("=======================");
+
+        client.close();
+        return;
+    }
+
+    //topic删除
+    public static void delTopic(String topic) throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+        // 获取 topic 列表
+        client.deleteTopics(Arrays.asList(topic)).all().get();
+
+        System.out.println("=======================");
+        //System.out.println("deleteTopicsResult  : " + deleteTopicsResult );
+        System.out.println("=======================");
+
+        client.close();
+        return;
+    }
+
+    //topic的分区列表
+    public static List<String> partitionsTopic(String topic) throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+        // 获取 topic 列表
+        List<String> descGroups = client.describeTopics(Arrays.asList(topic)).all().get().get(topic).partitions().stream().flatMap(partition -> Stream.of(String.valueOf(partition.partition())+":"+String.valueOf(partition.replicas().size()))).collect(Collectors.toList());;
+        //List<St> descGroups1 = client.describeTopics(Arrays.asList(topic)).all().get().get(topic).partitions().stream().map(TopicPartitionInfo::replicas.).collect(Collectors.toList());;
+        //AdminClient.deleteRecords()
+
+        System.out.println("=======================");
+        System.out.println("descGroups  : " + descGroups );
+        //System.out.println("descGroups1  : " + descGroups1 );
+        System.out.println("=======================");
+
+        client.close();
+        return descGroups;
+    }
+
+    //删除groupId
+    public static void delGroupId(String groupId) throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+        // 获取 topic 列表
+        client.deleteConsumerGroups(Arrays.asList(groupId)).all().get();
+
+        System.out.println("=======================");
+        //System.out.println("deleteTopicsResult  : " + deleteTopicsResult );
+        System.out.println("=======================");
+
+        client.close();
+        return;
+    }
+
+    //集群的节点列表
+    public static List<String> descCluster() throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+        // 获取 topic 列表
+        List<String> descGroups = client.describeCluster().nodes().get().stream().flatMap(node -> Stream.of(node.host()+":"+String.valueOf(node.port()))).collect(Collectors.toList());
+        System.out.println("=======================");
+        System.out.println("descGroups  : " + descGroups );
+        //System.out.println("descGroups1  : " + descGroups1 );
+        System.out.println("=======================");
+        client.close();
+        return descGroups;
+    }
+
 
     //消费者列表
     public static List<String> kafkaConsumerGroups() throws ExecutionException, InterruptedException, TimeoutException {
@@ -62,6 +163,7 @@ public class KafkaUtil {
         System.out.println(JSON.toJSONString(allGroups));
         //System.out.println(JSON.toJSONString(filteredGroups));
         System.out.println("=======================");
+        client.close();
         return allGroups;
 
 
@@ -100,6 +202,7 @@ public class KafkaUtil {
         System.out.println(JSON.toJSONString(allGroups));
         System.out.println(JSON.toJSONString(filteredGroups));
         System.out.println("=======================");
+        client.close();
         return filteredGroups;
 
 
@@ -470,6 +573,13 @@ public class KafkaUtil {
     private static List<LinkedHashMap<String, Object>> consumerPositions(String topic, String groupId) throws ExecutionException, InterruptedException{
         KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+
+
         List<PartitionInfo> partitionInfos = kafkaConsumer.partitionsFor(topic);
         System.out.println("Get the partition info as below:");
         List<LinkedHashMap<String, Object>> result = new ArrayList<>();
@@ -484,18 +594,74 @@ public class KafkaUtil {
                 Set<TopicPartition> partitions = new HashSet<TopicPartition>();
                 partitions.add(topicPartition);
                 long current = kafkaConsumer.committed(partitions).get(topicPartition).offset();
+
+                long current1 = client.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata().get().get(topicPartition).offset();
                 long partition = topicPartition.partition();
-//                long lag = end - current;
-//                long offset = current -begin;
-//                long size = end - begin;
+
+
+                long lag = end - current;
+                long size = end - begin;
                 System.out.println("partition = " + partition);
                 System.out.println("begin = " + begin);
                 System.out.println("end = " + end);
                 System.out.println("current = " + current);
+                System.out.println("current1 = " + current1);
+                System.out.println("size = " + size);
+                System.out.println("lag = " + lag);
                 offsetMeta.put("partition",partition);
                 offsetMeta.put("begin",begin);
                 offsetMeta.put("end",end);
                 offsetMeta.put("current",current);
+                offsetMeta.put("current1",current1);
+                offsetMeta.put("size",size);
+                offsetMeta.put("lag",lag);
+                result.add(offsetMeta);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+        }
+
+        return result;
+    }
+
+
+    ///获取指定topic数据量详情情况
+    //[{
+    //		"partition": 0,
+    //		"begin": 0,
+    //		"end": 0,
+    //		"size": 0
+    //	}]
+    private static List<LinkedHashMap<String, Object>> topicSize(String topic) throws ExecutionException, InterruptedException{
+
+        String groupId = "guest";
+        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+
+        List<PartitionInfo> partitionInfos = kafkaConsumer.partitionsFor(topic);
+        System.out.println("Get the partition info as below:");
+        List<LinkedHashMap<String, Object>> result = new ArrayList<>();
+        for (PartitionInfo partitionInfo : partitionInfos) {
+            LinkedHashMap<String, Object> offsetMeta = new LinkedHashMap<String, Object>();
+            TopicPartition topicPartition = new TopicPartition(topic, partitionInfo.partition());
+            try {
+                // 5.通过Consumer.endOffsets(Collections<TopicPartition>)方法获取
+                // 指定TopicPartition对应的lastOffset
+                long begin = kafkaConsumer.beginningOffsets(Arrays.asList(topicPartition)).get(topicPartition);
+                long end = kafkaConsumer.endOffsets(Arrays.asList(topicPartition)).get(topicPartition);
+                Set<TopicPartition> partitions = new HashSet<TopicPartition>();
+                partitions.add(topicPartition);
+                long partition = topicPartition.partition();
+
+                long size = end - begin;
+                System.out.println("partition = " + partition);
+                System.out.println("begin = " + begin);
+                System.out.println("end = " + end);
+                System.out.println("size = " + size);
+                offsetMeta.put("partition",partition);
+                offsetMeta.put("begin",begin);
+                offsetMeta.put("end",end);
+                offsetMeta.put("size",size);
                 result.add(offsetMeta);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -510,11 +676,85 @@ public class KafkaUtil {
 
 
 
+    ///获取所有topic数据量详情情况
+    // {
+    //	"TAG6f6c4f162844000": [{
+    //		"partition": 0,
+    //		"begin": 0,
+    //		"end": 0,
+    //		"size": 0
+    //	}],
+    //	"TAG77362004b844000": [{
+    //		"partition": 0,
+    //		"begin": 65,
+    //		"end": 65,
+    //		"size": 0
+    //	}]
+    //	}
+    private static LinkedHashMap<String, Object> topicSizeAll() throws ExecutionException, InterruptedException{
+        List<String> topicList = kafkaListTopics();
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+        for (String topic : topicList) {
+            List<LinkedHashMap<String, Object>> list= topicSize(topic);
+            System.out.println("list = " + list);;
+            result.put(topic,list);
+        }
+        return result;
+    }
+
+
+    ///获取指定topic数据量统计{"partitionNum":5452,"dataNum":41570647}
+    private static LinkedHashMap<String, Object> topicSizeStatistics(String topic) throws ExecutionException, InterruptedException {
+
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+        long partitionNum = 0L;
+        long dataNum = 0L;
+
+        List<LinkedHashMap<String, Object>> list = topicSize(topic);
+        partitionNum = list.size();
+        //list.forEach(item->dataNum=dataNum+item.get("size"));
+        dataNum = list.stream().mapToLong(item -> (long) item.get("size")).sum();
+
+
+        result.put("partitionNum", partitionNum);
+        result.put("dataNum", dataNum);
+
+        return result;
+    }
+
+    ///获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
+    private static LinkedHashMap<String, Object> topicSizeStatisticsALL() throws ExecutionException, InterruptedException{
+        List<String> topicList = kafkaListTopics();
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+        long partitionNum = 0L;
+        long dataNum = 0L;
+        for (String topic : topicList) {
+            List<LinkedHashMap<String, Object>> list= topicSize(topic);
+            partitionNum = partitionNum + list.size();
+            //list.forEach(item->dataNum=dataNum+item.get("size"));
+            dataNum += list.stream().mapToLong(item -> (long) item.get("size")).sum();
+        }
+        result.put("topicNum",topicList.size());
+        result.put("partitionNum",partitionNum);
+        result.put("dataNum",dataNum);
+
+        return result;
+    }
+
+
     public static void main(String[] args) throws ExecutionException, InterruptedException,TimeoutException {
         long start=System.currentTimeMillis();   //获取开始时间
 
-        List list = KafkaUtil.kafkaListTopics();
-
+//        List<String> list = KafkaUtil.kafkaListTopics();
+//
+//        for (String topic : list) {
+//
+//            System.out.println("list = " + topicSize(topic,"group1"));;
+//
+//            //TimeUnit.DAYS.sleep(1);
+//        }
+        //System.out.println("map = " + JSON.toJSONString(topicSizeAll()));
+        System.out.println("map = " + JSON.toJSONString(topicSizeStatistics("RULEa93304e6d844000")));;
 
 
         //resetOffsetToEarliest("RULEa93304e6d844000", "group1");
@@ -522,21 +762,34 @@ public class KafkaUtil {
         //JSONObject object = JSONUtil.parseObj(recordMeta);
         //System.out.println("object.toJSONString(4) = " + object.toJSONString(4));
 //        sendToKafka("RULEa93304e6d844000","333","aaaa");
-
+        //delGroupId("group1");
         //System.out.println("kafkaListTopics() = " + kafkaListTopics());
-
+        //sendToKafka("RULEa93304e6d844000", "222", "aaaa");
         //ArrayList buffer = recvFromKafka("RULEa93304e6d844000", "group1");
-        //recvFromKafka("RULEa93304e6d844000", "group2");
+
+
+
+       // recvFromKafka("RULEa93304e6d844000", "group1");
+        //recvFromKafka("RULEa93304e6d844000", "group1");
         //recvFromKafka("RULEa93304e6d844000", "group3");
 
         //kafkaConsumerGroups("RULEa93304e6d844000");
         //kafkaConsumerGroups();
-        sendToKafka("RULEa93304e6d844000", "222", "aaaa");
+//        sendToKafka("RULEa93304e6d844000", "222", "aaaa");
+//
+//        for (int i = 0; i < 100; i++) {
+//            sendToKafkaAsync("RULEa93304e6d844000", "222", "aaaa");
+//            //sendToKafka("RULEa93304e6d844000", "333", "aaaa");
+//        }
 
-        for (int i = 0; i < 100; i++) {
-            sendToKafkaAsync("RULEa93304e6d844000", "222", "aaaa");
-            //sendToKafka("RULEa93304e6d844000", "333", "aaaa");
-        }
+        //createTopic("atest0908");
+        //partitionsTopic("atest0908");
+        //delTopic("atest0908");
+        //partitionsTopic("RULE735e0e863c44000");//50分区
+        //descCluster();
+        //consumerPositions("RULEa93304e6d844000","group1");
+        //delGroupId("group1");
+        //recvFromKafka("RULE735e0e863c44000", "group1");
 
         TimeUnit.DAYS.sleep(1);
 
