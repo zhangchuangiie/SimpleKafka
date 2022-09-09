@@ -17,6 +17,11 @@
 
 ## 接口介绍：
 1. **kafkaListTopics：** topic列表
+//topic创建
+//topic删除
+//topic的分区列表
+//删除groupId
+//集群的节点列表
 2. **kafkaConsumerGroups：** 消费者列表
 3. **kafkaConsumerGroups：** 指定topic的活跃消费者列表
 4. **sendToKafka：** 生产数据到指定的topic,同步接口
@@ -29,9 +34,17 @@
 11. **resetOffsetToEarliest：** 重置指定topic的offset到最早
 12. **resetOffsetToLatest：** 重置指定topic的offset到最晚，一般在跳过测试脏数据时候使用
 13. **consumerPositions：** 获取当前消费偏移量情况
-
+获取指定topic数据量详情情况
+获取所有topic数据量详情情况
+获取指定topic数据量统计{"partitionNum":5452,"dataNum":41570647}
+获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
 ## 接口列表：
 1. **kafkaListTopics:** List<String> kafkaListTopics()
+void createTopic(String topic)
+void delTopic(String topic)
+List<String> partitionsTopic(String topic)
+void delGroupId(String groupId)
+List<String> descCluster()
 2. **kafkaConsumerGroups:** List<String> kafkaConsumerGroups()
 3. **kafkaConsumerGroups：** List<String> kafkaConsumerGroups(String topic)
 4. **sendToKafka：** LinkedHashMap<String, Object> sendToKafka(String topic, String key, String value)
@@ -44,6 +57,10 @@
 11. **resetOffsetToEarliest：** boolean resetOffsetToEarliest(String topic, String groupId)
 12. **resetOffsetToLatest：** boolean resetOffsetToLatest(String topic, String groupId)
 13. **consumerPositions：** List<LinkedHashMap<String, Object>> consumerPositions(String topic, String groupId)
+List<LinkedHashMap<String, Object>> topicSize(String topic)
+LinkedHashMap<String, Object> topicSizeAll()
+LinkedHashMap<String, Object> topicSizeStatistics(String topic)
+LinkedHashMap<String, Object> topicSizeStatisticsALL()
 
 ## 联系人：
 有问题可以联系:zhangchuang@iie.ac.cn
