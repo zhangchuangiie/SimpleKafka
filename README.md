@@ -24,17 +24,17 @@
 6. **descCluster:** 集群的节点列表
 7. **kafkaConsumerGroups：** 消费者列表
 8. **kafkaConsumerGroups：** 指定topic的活跃消费者列表
-9. **sendToKafka：** 生产数据到指定的topic,同步接口
+9. **sendToKafka：** 生产数据到指定的topic,同步接口{"topic":"RULEa93304e6d844000","partition":1,"offset":681}
 10. **sendToKafkaAsync：** 生产数据到指定的topic，异步接口，默认回调
 11. **sendToKafkaAsync：** 生产数据到指定的topic，异步接口，自定义回调
-12. **recvFromKafka：** 按groupId消费指定topic的数据
+12. **recvFromKafka：** 按groupId消费指定topic的数据[{"topic":"RULEa93304e6d844000","key":"222","value":"aaaa","partition":1,"offset":681}]
 13. **recvFromKafkaByOffset：** 消费指定topic指定partition对应的offset数据
 14. **recvFromKafkaByTimestamp：** 消费指定topic指定partition对应的timestamp以后的数据
 15. **resetOffsetToTimestamp：** 重置指定topic的offset到对应的timestamp
 16. **resetOffsetToEarliest：** 重置指定topic的offset到最早
 17. **resetOffsetToLatest：** 重置指定topic的offset到最晚，一般在跳过测试脏数据时候使用
-18. **consumerPositions：** 获取当前消费偏移量情况
-19. **topicSize：** 获取指定topic数据量详情情况 {"partition": 0,"begin": 65,"end": 65,"size": 0}
+18. **consumerPositions：** 获取当前消费偏移量情况{"partitionNum":2,"dataNum":1,"lagNum":0,"positions":[{"partition":0,"begin":0,"end":0,"current":0,"current1":0,"size":0,"lag":0},{"partition":1,"begin":681,"end":682,"current":682,"current1":682,"size":1,"lag":0}]}
+19. **topicSize：** 获取指定topic数据量详情情况 [{"partition": 0,"begin": 65,"end": 65,"size": 0}]
 20. **topicSizeAll：** 获取所有topic数据量详情情况
 21. **topicSizeStatistics：** 获取指定topic数据量统计{"partitionNum":5452,"dataNum":41570647}
 22. **topicSizeStatisticsAll：** 获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
