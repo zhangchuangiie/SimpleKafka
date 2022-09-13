@@ -24,7 +24,7 @@ public class KafkaUtil {
 
     private static HashMap<String, KafkaConsumer<String, String>> kafkaConsumerMap = new HashMap<>();
     private static HashMap<String, KafkaProducer<String, String>> kafkaProducerMap = new HashMap<>();
-    private static String brokerList = "";
+    private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
     //topic列表
     public static List<String> kafkaListTopics() throws ExecutionException, InterruptedException {
 
@@ -290,7 +290,7 @@ public class KafkaUtil {
     }
 
 
-    //生产数据到指定的topic,同步接口
+    //生产数据到指定的topic,同步接口 {"topic":"RULEa93304e6d844000","partition":1,"offset":681}
     public static LinkedHashMap<String, Object> sendToKafka(String topic, String key, String value) throws ExecutionException, InterruptedException {
         long start=System.currentTimeMillis();   //获取开始时间
         KafkaProducer<String, String> kafkaProducer = getKafkaProducer();
@@ -360,7 +360,7 @@ public class KafkaUtil {
     }
 
 
-    //按groupId消费指定topic的数据
+    //按groupId消费指定topic的数据 [{"topic":"RULEa93304e6d844000","key":"222","value":"aaaa","partition":1,"offset":681}]
     public static ArrayList<LinkedHashMap<String, Object>> recvFromKafka(String topic, String groupId) throws ExecutionException, InterruptedException {
 
         KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
@@ -568,9 +568,54 @@ public class KafkaUtil {
         return true;
     }
 
-
     ///获取当前消费偏移量情况
-    private static List<LinkedHashMap<String, Object>> consumerPositions(String topic, String groupId) throws ExecutionException, InterruptedException{
+//    {
+//        "partitionNum": 5,
+//            "dataNum": 1,
+//            "lagNum": 0,
+//            "positions": [{
+//        "partition": 0,
+//                "begin": 0,
+//                "end": 0,
+//                "current": 0,
+//                "current1": 0,
+//                "size": 0,
+//                "lag": 0
+//    }, {
+//        "partition": 4,
+//                "begin": 0,
+//                "end": 0,
+//                "current": 0,
+//                "current1": 0,
+//                "size": 0,
+//                "lag": 0
+//    }, {
+//        "partition": 3,
+//                "begin": 0,
+//                "end": 0,
+//                "current": 0,
+//                "current1": 0,
+//                "size": 0,
+//                "lag": 0
+//    }, {
+//        "partition": 2,
+//                "begin": 72,
+//                "end": 72,
+//                "current": 72,
+//                "current1": 72,
+//                "size": 0,
+//                "lag": 0
+//    }, {
+//        "partition": 1,
+//                "begin": 681,
+//                "end": 682,
+//                "current": 682,
+//                "current1": 682,
+//                "size": 1,
+//                "lag": 0
+//    }]
+//    }
+    private static LinkedHashMap<String, Object> consumerPositions(String topic, String groupId) throws ExecutionException, InterruptedException {
         KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
         Properties props = new Properties();
@@ -582,7 +627,10 @@ public class KafkaUtil {
 
         List<PartitionInfo> partitionInfos = kafkaConsumer.partitionsFor(topic);
         System.out.println("Get the partition info as below:");
-        List<LinkedHashMap<String, Object>> result = new ArrayList<>();
+        LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
+        List<LinkedHashMap<String, Object>> positions = new ArrayList<>();
+        long lagNum = 0L;
+        long dataNum = 0L;
         for (PartitionInfo partitionInfo : partitionInfos) {
             LinkedHashMap<String, Object> offsetMeta = new LinkedHashMap<String, Object>();
             TopicPartition topicPartition = new TopicPartition(topic, partitionInfo.partition());
@@ -601,6 +649,8 @@ public class KafkaUtil {
 
                 long lag = end - current;
                 long size = end - begin;
+                lagNum+=lag;
+                dataNum+=size;
                 System.out.println("partition = " + partition);
                 System.out.println("begin = " + begin);
                 System.out.println("end = " + end);
@@ -608,23 +658,27 @@ public class KafkaUtil {
                 System.out.println("current1 = " + current1);
                 System.out.println("size = " + size);
                 System.out.println("lag = " + lag);
-                offsetMeta.put("partition",partition);
-                offsetMeta.put("begin",begin);
-                offsetMeta.put("end",end);
-                offsetMeta.put("current",current);
-                offsetMeta.put("current1",current1);
-                offsetMeta.put("size",size);
-                offsetMeta.put("lag",lag);
-                result.add(offsetMeta);
+                offsetMeta.put("partition", partition);
+                offsetMeta.put("begin", begin);
+                offsetMeta.put("end", end);
+                offsetMeta.put("current", current);
+                offsetMeta.put("current1", current1);
+                offsetMeta.put("size", size);
+                offsetMeta.put("lag", lag);
+                positions.add(offsetMeta);
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
         }
 
+        result.put("partitionNum",partitionInfos.size());
+        result.put("dataNum",dataNum);
+        result.put("lagNum",lagNum);
+        result.put("positions",positions);
+
         return result;
     }
-
 
     ///获取指定topic数据量详情情况
     //[{
@@ -723,7 +777,7 @@ public class KafkaUtil {
     }
 
     ///获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
-    private static LinkedHashMap<String, Object> topicSizeStatisticsALL() throws ExecutionException, InterruptedException{
+    private static LinkedHashMap<String, Object> topicSizeStatisticsAll() throws ExecutionException, InterruptedException{
         List<String> topicList = kafkaListTopics();
         LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
         long partitionNum = 0L;
@@ -754,7 +808,7 @@ public class KafkaUtil {
 //            //TimeUnit.DAYS.sleep(1);
 //        }
         //System.out.println("map = " + JSON.toJSONString(topicSizeAll()));
-        System.out.println("map = " + JSON.toJSONString(topicSizeStatistics("RULEa93304e6d844000")));;
+       // System.out.println("map = " + JSON.toJSONString(topicSizeStatistics("RULEa93304e6d844000")));;
 
 
         //resetOffsetToEarliest("RULEa93304e6d844000", "group1");
@@ -764,10 +818,12 @@ public class KafkaUtil {
 //        sendToKafka("RULEa93304e6d844000","333","aaaa");
         //delGroupId("group1");
         //System.out.println("kafkaListTopics() = " + kafkaListTopics());
-        //sendToKafka("RULEa93304e6d844000", "222", "aaaa");
-        //ArrayList buffer = recvFromKafka("RULEa93304e6d844000", "group1");
-
-
+        LinkedHashMap<String, Object> result = sendToKafka("RULEa93304e6d844000", "222", "aaaa");
+        System.out.println("result = " + JSON.toJSONString(result));
+        ArrayList<LinkedHashMap<String, Object>> buffer = recvFromKafka("RULEa93304e6d844000", "group1");
+        System.out.println("buffer = " + JSON.toJSONString(buffer));
+        LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
+        System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
 
        // recvFromKafka("RULEa93304e6d844000", "group1");
         //recvFromKafka("RULEa93304e6d844000", "group1");
