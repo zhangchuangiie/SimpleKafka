@@ -22,9 +22,13 @@ import java.util.stream.Stream;
 
 public class KafkaUtil {
 
-    private static HashMap<String, KafkaConsumer<String, String>> kafkaConsumerMap = new HashMap<>();
-    private static HashMap<String, KafkaProducer<String, String>> kafkaProducerMap = new HashMap<>();
-    private static String brokerList = "";
+    private static HashMap<String, KafkaConsumer<String, Object>> kafkaConsumerMap = new HashMap<>();
+    private static HashMap<String, KafkaProducer<String, Object>> kafkaProducerMap = new HashMap<>();
+    //private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
+    //private static String brokerList = "47.94.149.36:9092";
+    private static String brokerList = "iZ2zehk94dstsat5cjspl6Z:9092";
+
+
     //topic列表
     public static List<String> kafkaListTopics() throws ExecutionException, InterruptedException {
 
@@ -210,9 +214,9 @@ public class KafkaUtil {
 
 
     ///维护内部客户端池
-    private static KafkaConsumer<String, String> getKafkaConsumer(String topic, String groupId) throws ExecutionException, InterruptedException {
+    private static KafkaConsumer<String, Object> getKafkaConsumer(String topic, String groupId) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = kafkaConsumerMap.get(topic+groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = kafkaConsumerMap.get(topic+groupId);
         if (kafkaConsumer==null){
             //创建 kafka 消费者实例
             kafkaConsumer = getNewKafkaConsumer(topic, groupId);
@@ -222,9 +226,9 @@ public class KafkaUtil {
         return kafkaConsumer;
     }
     ///维护内部客户端池
-    private static KafkaProducer<String, String> getKafkaProducer() throws ExecutionException, InterruptedException {
+    private static KafkaProducer<String, Object> getKafkaProducer() throws ExecutionException, InterruptedException {
 
-        KafkaProducer<String, String> kafkaProducer = kafkaProducerMap.get("default");
+        KafkaProducer<String, Object> kafkaProducer = kafkaProducerMap.get("default");
         if (kafkaProducer==null){
 
             //创建一个生产者对象kafkaProducer
@@ -235,7 +239,7 @@ public class KafkaUtil {
         return kafkaProducer;
     }
     ///正常不需要这个接口，本身都支持多线程，这个接口仅在想自己在多线程内初始化多个客户端时使用,依旧要受Kafka的“一个Partition只能被该Group里的一个Consumer线程消费”规则的限制
-    public static KafkaConsumer<String, String> getNewKafkaConsumer(String topic, String groupId) throws ExecutionException, InterruptedException {
+    public static KafkaConsumer<String, Object> getNewKafkaConsumer(String topic, String groupId) throws ExecutionException, InterruptedException {
 
         //String groupId = "group1";
         //String topic = "hello-kafka";
@@ -247,6 +251,7 @@ public class KafkaUtil {
         properties.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         //properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "2");
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
+        //可以根据需求修改序列化类型，其他代码都不需要修改，暂时不支持为特定topic指定序列化类型，只能全局使用一种序列化类型
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         //properties.put(ConsumerConfig.FETCH_MAX_WAIT_MS_CONFIG, 500);
         //properties.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, 1048576);
@@ -259,7 +264,7 @@ public class KafkaUtil {
         properties.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, 2000);
 
         //创建 kafka 消费者实例
-        KafkaConsumer<String, String> kafkaConsumer = new KafkaConsumer<String, String>(properties);
+        KafkaConsumer<String, Object> kafkaConsumer = new KafkaConsumer<String, Object>(properties);
         //订阅主题
         kafkaConsumer.subscribe(Collections.singletonList(topic));
 
@@ -267,7 +272,7 @@ public class KafkaUtil {
         return kafkaConsumer;
     }
     ///正常不需要这个接口，本身都支持多线程，这个接口仅在想自己在多线程内初始化多个客户端时使用
-    public static KafkaProducer<String, String> getNewKafkaProducer() throws ExecutionException, InterruptedException {
+    public static KafkaProducer<String, Object> getNewKafkaProducer() throws ExecutionException, InterruptedException {
 
         Properties properties = new Properties();
         properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
@@ -280,10 +285,11 @@ public class KafkaUtil {
         properties.put(ProducerConfig.LINGER_MS_CONFIG, 1);
 
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
+        //可以根据需求修改序列化类型，其他代码都不需要修改，暂时不支持为特定topic指定序列化类型，只能全局使用一种序列化类型
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, "org.apache.kafka.common.serialization.StringSerializer");
 
         //创建一个生产者对象kafkaProducer
-        KafkaProducer<String, String> kafkaProducer = new KafkaProducer<String, String>(properties);
+        KafkaProducer<String, Object> kafkaProducer = new KafkaProducer<String, Object>(properties);
 
 
         return kafkaProducer;
@@ -291,10 +297,11 @@ public class KafkaUtil {
 
 
     //生产数据到指定的topic,同步接口 {"topic":"RULEa93304e6d844000","partition":1,"offset":681}
-    public static LinkedHashMap<String, Object> sendToKafka(String topic, String key, String value) throws ExecutionException, InterruptedException {
+    //KafkaProducer是线程安全的，鼓励用户在多个线程中共享一个KafkaProducer实例，这样通常都要比每个线程维护一个KafkaProducer实例效率要高。
+    public static LinkedHashMap<String, Object> sendToKafka(String topic, String key, Object value) throws ExecutionException, InterruptedException {
         long start=System.currentTimeMillis();   //获取开始时间
-        KafkaProducer<String, String> kafkaProducer = getKafkaProducer();
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic,key,value);
+        KafkaProducer<String, Object> kafkaProducer = getKafkaProducer();
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic,key,value);
         RecordMetadata recordMetadata = kafkaProducer.send(producerRecord).get();
 
         System.out.println("recordMetadata = " + recordMetadata);
@@ -314,10 +321,10 @@ public class KafkaUtil {
 
 
     //生产数据到指定的topic，异步接口，默认回调
-    public static void sendToKafkaAsync(String topic, String key, String value) throws ExecutionException, InterruptedException {
+    public static void sendToKafkaAsync(String topic, String key, Object value) throws ExecutionException, InterruptedException {
         long start=System.currentTimeMillis();   //获取开始时间
-        KafkaProducer<String, String> kafkaProducer = getKafkaProducer();
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic,key,value);
+        KafkaProducer<String, Object> kafkaProducer = getKafkaProducer();
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic,key,value);
 
         Callback callback = new Callback() {
             long start=System.currentTimeMillis();   //获取开始时间
@@ -349,10 +356,10 @@ public class KafkaUtil {
 
 
     //生产数据到指定的topic，异步接口，自定义回调
-    public static void sendToKafkaAsync(String topic, String key, String value,Callback callback) throws ExecutionException, InterruptedException {
+    public static void sendToKafkaAsync(String topic, String key, Object value,Callback callback) throws ExecutionException, InterruptedException {
         long start=System.currentTimeMillis();   //获取开始时间
-        KafkaProducer<String, String> kafkaProducer = getKafkaProducer();
-        ProducerRecord<String, String> producerRecord = new ProducerRecord<>(topic,key,value);
+        KafkaProducer<String, Object> kafkaProducer = getKafkaProducer();
+        ProducerRecord<String, Object> producerRecord = new ProducerRecord<>(topic,key,value);
         Future<RecordMetadata> recordMetadata = kafkaProducer.send(producerRecord,callback);
         long end=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(end-start)+"ms");
@@ -363,19 +370,19 @@ public class KafkaUtil {
     //按groupId消费指定topic的数据 [{"topic":"RULEa93304e6d844000","key":"222","value":"aaaa","partition":1,"offset":681}]
     public static ArrayList<LinkedHashMap<String, Object>> recvFromKafka(String topic, String groupId) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
         ArrayList buffer = new ArrayList<>();
 
         long start=System.currentTimeMillis();   //获取开始时间
-        ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(5000));
+        ConsumerRecords<String, Object> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(5000));
         kafkaConsumer.commitAsync();
         long end=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(end-start)+"ms");
         //System.out.println("i = " + i);
         System.out.println("consumerRecords = " + consumerRecords.count());
 
-        for (ConsumerRecord<String, String> record : consumerRecords) {
+        for (ConsumerRecord<String, Object> record : consumerRecords) {
             LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
             data.put("topic", record.topic());
             data.put("key", record.key());
@@ -396,7 +403,7 @@ public class KafkaUtil {
     //消费指定topic指定partition对应的offset数据
     public static ArrayList<LinkedHashMap<String, Object>> recvFromKafkaByOffset(String topic, String groupId,int partition,long offset) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
         ArrayList buffer = new ArrayList<>();
 
@@ -412,14 +419,14 @@ public class KafkaUtil {
         TopicPartition topicPartition = new TopicPartition(topic,partition);
         kafkaConsumer.seek(topicPartition,offset); // 指定offset
 
-        ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(5000));
+        ConsumerRecords<String, Object> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(5000));
         kafkaConsumer.commitAsync();
         long end=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(end-start)+"ms");
         //System.out.println("i = " + i);
         System.out.println("consumerRecords = " + consumerRecords.count());
 
-        for (ConsumerRecord<String, String> record : consumerRecords) {
+        for (ConsumerRecord<String, Object> record : consumerRecords) {
             LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
             data.put("topic", record.topic());
             data.put("key", record.key());
@@ -439,7 +446,7 @@ public class KafkaUtil {
     //消费指定topic指定partition对应的timestamp以后的数据
     public static ArrayList<LinkedHashMap<String, Object>> recvFromKafkaByTimestamp(String topic, String groupId,int partition,long timestamp) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
         ArrayList buffer = new ArrayList<>();
 
@@ -461,14 +468,14 @@ public class KafkaUtil {
 
         kafkaConsumer.seek(topicPartition,offset); // 指定offset
 
-        ConsumerRecords<String, String> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(5000));
+        ConsumerRecords<String, Object> consumerRecords = kafkaConsumer.poll(Duration.ofMillis(5000));
         kafkaConsumer.commitAsync();
         long end=System.currentTimeMillis(); //获取结束时间
         System.out.println("程序运行时间： "+(end-start)+"ms");
         //System.out.println("i = " + i);
         System.out.println("consumerRecords = " + consumerRecords.count());
 
-        for (ConsumerRecord<String, String> record : consumerRecords) {
+        for (ConsumerRecord<String, Object> record : consumerRecords) {
             LinkedHashMap<String, Object> data = new LinkedHashMap<String, Object>();
             data.put("topic", record.topic());
             data.put("key", record.key());
@@ -488,7 +495,7 @@ public class KafkaUtil {
     //重置指定topic的offset到对应的timestamp
     public static boolean resetOffsetToTimestamp(String topic, String groupId, long timestamp) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
         //用于保存消息的list
         ArrayList buffer = new ArrayList<>();
 
@@ -520,7 +527,7 @@ public class KafkaUtil {
     //重置指定topic的offset到最早
     public static boolean resetOffsetToEarliest(String topic, String groupId) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
         long start=System.currentTimeMillis();   //获取开始时间
         // 指定位置开始消费
@@ -545,7 +552,7 @@ public class KafkaUtil {
     //重置指定topic的offset到最晚，一般在跳过测试脏数据时候使用
     public static boolean resetOffsetToLatest(String topic, String groupId) throws ExecutionException, InterruptedException {
 
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
         long start=System.currentTimeMillis();   //获取开始时间
         // 指定位置开始消费
@@ -616,7 +623,7 @@ public class KafkaUtil {
 //    }]
 //    }
     private static LinkedHashMap<String, Object> consumerPositions(String topic, String groupId) throws ExecutionException, InterruptedException {
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
         Properties props = new Properties();
         // 只需要提供一个或多个 broker 的 IP 和端口
@@ -690,7 +697,7 @@ public class KafkaUtil {
     private static List<LinkedHashMap<String, Object>> topicSize(String topic) throws ExecutionException, InterruptedException{
 
         String groupId = "guest";
-        KafkaConsumer<String, String> kafkaConsumer = getKafkaConsumer(topic, groupId);
+        KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
         List<PartitionInfo> partitionInfos = kafkaConsumer.partitionsFor(topic);
         System.out.println("Get the partition info as below:");
@@ -822,8 +829,8 @@ public class KafkaUtil {
         System.out.println("result = " + JSON.toJSONString(result));
         ArrayList<LinkedHashMap<String, Object>> buffer = recvFromKafka("RULEa93304e6d844000", "group1");
         System.out.println("buffer = " + JSON.toJSONString(buffer));
-        LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
-        System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
+        //LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
+        //System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
 
        // recvFromKafka("RULEa93304e6d844000", "group1");
         //recvFromKafka("RULEa93304e6d844000", "group1");
