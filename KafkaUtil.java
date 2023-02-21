@@ -24,8 +24,7 @@ public class KafkaUtil {
 
     private static HashMap<String, KafkaConsumer<String, Object>> kafkaConsumerMap = new HashMap<>();
     private static HashMap<String, KafkaProducer<String, Object>> kafkaProducerMap = new HashMap<>();
-    //private static String brokerList = "192.168.0.212:9092,192.168.0.213:9092,192.168.0.214:9092,192.168.0.215:9092";
-    //private static String brokerList = "47.94.149.36:9092";
+
     private static String brokerList = "iZ2zehk94dstsat5cjspl6Z:9092";
 
 
@@ -215,7 +214,8 @@ public class KafkaUtil {
 
     ///维护内部客户端池
     private static KafkaConsumer<String, Object> getKafkaConsumer(String topic, String groupId) throws ExecutionException, InterruptedException {
-
+        //long ThreadId = Thread.currentThread().getId();
+        //System.out.println("topic+groupId+ThreadId = " + topic+groupId+ThreadId);
         KafkaConsumer<String, Object> kafkaConsumer = kafkaConsumerMap.get(topic+groupId);
         if (kafkaConsumer==null){
             //创建 kafka 消费者实例
@@ -238,7 +238,7 @@ public class KafkaUtil {
 
         return kafkaProducer;
     }
-    ///正常不需要这个接口，本身都支持多线程，这个接口仅在想自己在多线程内初始化多个客户端时使用,依旧要受Kafka的“一个Partition只能被该Group里的一个Consumer线程消费”规则的限制
+    ///正常不需要这个接口，本身支持多线程（不会抛出 ConcurrentModificationException），这个接口仅在想自己在多线程内初始化多个客户端时使用,依旧要受Kafka的“一个Partition只能被该Group里的一个Consumer线程消费”规则的限制,就是如果线程小于分区，也没问题，只是负载不见得均衡，如果大于分区，就会有一些线程消费不到数据
     public static KafkaConsumer<String, Object> getNewKafkaConsumer(String topic, String groupId) throws ExecutionException, InterruptedException {
 
         //String groupId = "group1";
@@ -408,13 +408,13 @@ public class KafkaUtil {
         ArrayList buffer = new ArrayList<>();
 
         long start=System.currentTimeMillis();   //获取开始时间
-        // 指定位置开始消费
-        Set<TopicPartition> assignment= new HashSet<>();
-        while (assignment.size() == 0) {
-            kafkaConsumer.poll(Duration.ofSeconds(1));
-            // 获取消费者分区分配信息（有了分区分配信息才能开始消费）
-            assignment = kafkaConsumer.assignment();
-        }
+//        // 指定位置开始消费
+//        Set<TopicPartition> assignment= new HashSet<>();
+//        while (assignment.size() == 0) {
+//            kafkaConsumer.poll(Duration.ofSeconds(1));
+//            // 获取消费者分区分配信息（有了分区分配信息才能开始消费）
+//            assignment = kafkaConsumer.assignment();
+//        }
         // 遍历所有分区，并指定 offset 从 100 的位置开始消费
         TopicPartition topicPartition = new TopicPartition(topic,partition);
         kafkaConsumer.seek(topicPartition,offset); // 指定offset
@@ -451,13 +451,13 @@ public class KafkaUtil {
         ArrayList buffer = new ArrayList<>();
 
         long start=System.currentTimeMillis();   //获取开始时间
-        // 指定位置开始消费
-        Set<TopicPartition> assignment= new HashSet<>();
-        while (assignment.size() == 0) {
-            kafkaConsumer.poll(Duration.ofSeconds(1));
-            // 获取消费者分区分配信息（有了分区分配信息才能开始消费）
-            assignment = kafkaConsumer.assignment();
-        }
+//        // 指定位置开始消费
+//        Set<TopicPartition> assignment= new HashSet<>();
+//        while (assignment.size() == 0) {
+//            kafkaConsumer.poll(Duration.ofSeconds(1));
+//            // 获取消费者分区分配信息（有了分区分配信息才能开始消费）
+//            assignment = kafkaConsumer.assignment();
+//        }
         // 遍历所有分区，并指定 offset 从 100 的位置开始消费
         TopicPartition topicPartition = new TopicPartition(topic,partition);
 
@@ -653,7 +653,6 @@ public class KafkaUtil {
                 long current1 = client.listConsumerGroupOffsets(groupId).partitionsToOffsetAndMetadata().get().get(topicPartition).offset();
                 long partition = topicPartition.partition();
 
-
                 long lag = end - current;
                 long size = end - begin;
                 lagNum+=lag;
@@ -710,8 +709,8 @@ public class KafkaUtil {
                 // 指定TopicPartition对应的lastOffset
                 long begin = kafkaConsumer.beginningOffsets(Arrays.asList(topicPartition)).get(topicPartition);
                 long end = kafkaConsumer.endOffsets(Arrays.asList(topicPartition)).get(topicPartition);
-                Set<TopicPartition> partitions = new HashSet<TopicPartition>();
-                partitions.add(topicPartition);
+                //Set<TopicPartition> partitions = new HashSet<TopicPartition>();
+                //partitions.add(topicPartition);
                 long partition = topicPartition.partition();
 
                 long size = end - begin;
@@ -825,12 +824,12 @@ public class KafkaUtil {
 //        sendToKafka("RULEa93304e6d844000","333","aaaa");
         //delGroupId("group1");
         //System.out.println("kafkaListTopics() = " + kafkaListTopics());
-        LinkedHashMap<String, Object> result = sendToKafka("RULEa93304e6d844000", "222", "aaaa");
-        System.out.println("result = " + JSON.toJSONString(result));
-        ArrayList<LinkedHashMap<String, Object>> buffer = recvFromKafka("RULEa93304e6d844000", "group1");
-        System.out.println("buffer = " + JSON.toJSONString(buffer));
-        //LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
-        //System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
+        //LinkedHashMap<String, Object> result = sendToKafka("RULEa93304e6d844000", "222", "aaaa");
+        //System.out.println("result = " + JSON.toJSONString(result));
+        //ArrayList<LinkedHashMap<String, Object>> buffer = recvFromKafka("RULEa93304e6d844000", "group1");
+        //System.out.println("buffer = " + JSON.toJSONString(buffer));
+        LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
+        System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
 
        // recvFromKafka("RULEa93304e6d844000", "group1");
         //recvFromKafka("RULEa93304e6d844000", "group1");
