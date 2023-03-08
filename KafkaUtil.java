@@ -48,7 +48,7 @@ public class KafkaUtil {
         return topicList;
     }
 
-    //topic创建
+    //topic创建,,,一般不用创建，开启auto.create.topics.enable=true后生产消息的时候自动创建num.partitions(默认值为1)个分区和default.replication.factor (默认值为1)个副本的对应topic。
     public static void createTopic(String topic) throws ExecutionException, InterruptedException {
 
         Properties props = new Properties();
@@ -56,8 +56,28 @@ public class KafkaUtil {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         // 创建 AdminClient 对象
         AdminClient client = KafkaAdminClient.create(props);
-        // 获取 topic 列表
-        NewTopic newTopic = new NewTopic(topic,4, (short)3);
+        // 获取 topic 列表  分区和副本数保持跟配置文件一致
+        NewTopic newTopic = new NewTopic(topic,3, (short)1);
+        client.createTopics(Arrays.asList(newTopic)).all().get();
+        System.out.println("=======================");
+
+        //System.out.println("CreateTopicsResult : " + createTopicsResult);
+        System.out.println("=======================");
+
+        client.close();
+        return;
+    }
+
+    //topic创建 手工指定numPartitions, replicationFactor
+    public static void createTopic(String topic, int numPartitions, short replicationFactor) throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+        // 创建 topic  分区和副本数保持跟配置文件一致
+        NewTopic newTopic = new NewTopic(topic,numPartitions, replicationFactor);
         client.createTopics(Arrays.asList(newTopic)).all().get();
         System.out.println("=======================");
 
@@ -76,11 +96,35 @@ public class KafkaUtil {
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
         // 创建 AdminClient 对象
         AdminClient client = KafkaAdminClient.create(props);
-        // 获取 topic 列表
+        // 删除 topic
         client.deleteTopics(Arrays.asList(topic)).all().get();
 
         System.out.println("=======================");
         //System.out.println("deleteTopicsResult  : " + deleteTopicsResult );
+        System.out.println("=======================");
+
+        client.close();
+        return;
+    }
+
+    //topic修改，，增加newPartitions
+    public static void alterTopic(String topic, int newPartitions) throws ExecutionException, InterruptedException {
+
+        Properties props = new Properties();
+        // 只需要提供一个或多个 broker 的 IP 和端口
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, brokerList);
+        // 创建 AdminClient 对象
+        AdminClient client = KafkaAdminClient.create(props);
+
+        Map<String, NewPartitions> partitionsMap = new HashMap<>();
+        //把Partition增加到2个
+        NewPartitions newPartitionsObject = NewPartitions.increaseTo(newPartitions);
+        partitionsMap.put(topic, newPartitionsObject);
+        client.createPartitions(partitionsMap).all().get();
+
+
+        System.out.println("=======================");
+        //System.out.println("alterTopicsResult  : " + alterTopicsResult );
         System.out.println("=======================");
 
         client.close();
@@ -828,8 +872,22 @@ public class KafkaUtil {
         //System.out.println("result = " + JSON.toJSONString(result));
         //ArrayList<LinkedHashMap<String, Object>> buffer = recvFromKafka("RULEa93304e6d844000", "group1");
         //System.out.println("buffer = " + JSON.toJSONString(buffer));
-        LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
-        System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
+//        LinkedHashMap<String, Object> consumerPosition= consumerPositions("RULEa93304e6d844000", "group1");
+//        System.out.println("consumerPosition = " + JSON.toJSONString(consumerPosition));
+
+
+        LinkedHashMap<String, Object> o= topicSizeAll();
+        System.out.println("o = " + o);
+
+
+        LinkedHashMap<String, Object> oo= topicSizeStatisticsAll();
+        System.out.println("oo = " + oo);
+
+
+        //alterTopic("RULEa93304e6d844000", 3);
+
+
+        //createTopic("aaa",3,(short)1);
 
        // recvFromKafka("RULEa93304e6d844000", "group1");
         //recvFromKafka("RULEa93304e6d844000", "group1");
