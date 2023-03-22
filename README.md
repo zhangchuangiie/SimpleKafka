@@ -63,9 +63,11 @@
 21. **topicSizeStatistics：** LinkedHashMap<String, Object> topicSizeStatistics(String topic)
 22. **topicSizeStatisticsAll：** LinkedHashMap<String, Object> topicSizeStatisticsALL()
 
-## 典型应用：
+## 示范应用：
 为了说明该工具的效用，基于该工具实现了一个HTTP接口的消息队列服务，该服务只用了几十行代码，就实现了基于标签内容的发布订阅服务，服务见APIKafka.java，客户端示例见ClientKafka.java。
+  
 该服务支持生产者任意标注标签，支持消费者按表达式条件订阅数据，表达式支持与或非，以及字符串子串匹配。
+  
 同时也支持消息回溯消费已经消息统计查询。
 
 ## 联系人：
