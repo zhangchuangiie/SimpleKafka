@@ -666,7 +666,7 @@ public class KafkaUtil {
 //                "lag": 0
 //    }]
 //    }
-    private static LinkedHashMap<String, Object> consumerPositions(String topic, String groupId) throws ExecutionException, InterruptedException {
+    public static LinkedHashMap<String, Object> consumerPositions(String topic, String groupId) throws ExecutionException, InterruptedException {
         KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
 
         Properties props = new Properties();
@@ -737,7 +737,7 @@ public class KafkaUtil {
     //		"end": 0,
     //		"size": 0
     //	}]
-    private static List<LinkedHashMap<String, Object>> topicSize(String topic) throws ExecutionException, InterruptedException{
+    public static List<LinkedHashMap<String, Object>> topicSize(String topic) throws ExecutionException, InterruptedException{
 
         String groupId = "guest";
         KafkaConsumer<String, Object> kafkaConsumer = getKafkaConsumer(topic, groupId);
@@ -795,7 +795,7 @@ public class KafkaUtil {
     //		"size": 0
     //	}]
     //	}
-    private static LinkedHashMap<String, Object> topicSizeAll() throws ExecutionException, InterruptedException{
+    public static LinkedHashMap<String, Object> topicSizeAll() throws ExecutionException, InterruptedException{
         List<String> topicList = kafkaListTopics();
         LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
         for (String topic : topicList) {
@@ -808,7 +808,7 @@ public class KafkaUtil {
 
 
     ///获取指定topic数据量统计{"partitionNum":5452,"dataNum":41570647}
-    private static LinkedHashMap<String, Object> topicSizeStatistics(String topic) throws ExecutionException, InterruptedException {
+    public static LinkedHashMap<String, Object> topicSizeStatistics(String topic) throws ExecutionException, InterruptedException {
 
         LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
         long partitionNum = 0L;
@@ -827,7 +827,7 @@ public class KafkaUtil {
     }
 
     ///获取所有topic数据量统计{"topicNum":2550,"partitionNum":5452,"dataNum":41570647}
-    private static LinkedHashMap<String, Object> topicSizeStatisticsAll() throws ExecutionException, InterruptedException{
+    public static LinkedHashMap<String, Object> topicSizeStatisticsAll() throws ExecutionException, InterruptedException{
         List<String> topicList = kafkaListTopics();
         LinkedHashMap<String, Object> result = new LinkedHashMap<String, Object>();
         long partitionNum = 0L;
@@ -882,6 +882,8 @@ public class KafkaUtil {
 
         LinkedHashMap<String, Object> oo= topicSizeStatisticsAll();
         System.out.println("oo = " + oo);
+
+       //delTopic("producer");
 
 
         //alterTopic("RULEa93304e6d844000", 3);
