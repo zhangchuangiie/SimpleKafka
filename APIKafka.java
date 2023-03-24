@@ -35,9 +35,10 @@ public class APIKafka {
     }
 
     @PostMapping("/recvData")
-    public RespValue recvData(@RequestParam("filter")String filter,
-                                 @RequestParam("groupId")String groupId) throws ExecutionException, InterruptedException {
-
+    public RespValue recvData(@RequestParam(name="filter",required = false)String filter,
+                              @RequestParam(name="groupId",required = false)String groupId) throws ExecutionException, InterruptedException {
+        if(filter == null){filter = "true";}
+        if(groupId == null){groupId = "guest";}
 
         ArrayList<LinkedHashMap<String, Object>> bufferTmp = KafkaUtil.recvFromKafka("producer",groupId);
         ArrayList<LinkedHashMap<String, Object>> buffer = new ArrayList<LinkedHashMap<String, Object>>();

@@ -50,6 +50,12 @@ public class ClientKafka {
 //            String result7=HttpUtil.post("http://localhost:8080/api/data/recvData",paramMap7);
 //            System.out.println("result7 = " + result7);
 
+            //            HashMap<String,Object> paramMap8=new HashMap<>();
+//            paramMap8.put("filter","c.length()>6");
+//            paramMap8.put("groupId","group4");
+//            String result8=HttpUtil.post("http://localhost:8080/api/data/recvData",paramMap8);
+//            System.out.println("result8 = " + result8);
+
 
 //            HashMap<String,Object> paramMap1=new HashMap<>();
 //            paramMap1.put("key","{\"a\":1,\"b\":2,\"c\":\"aaa\"}");
@@ -84,22 +90,22 @@ public class ClientKafka {
 //            System.out.println("result7 = " + result7);
 
 
-            HashMap<String,Object> paramMap2=new HashMap<>();
-            paramMap2.put("key","{\"other\":\"label1_22\"}");
-            paramMap2.put("value","aaa");
-            String result2=HttpUtil.post("http://localhost:8080/api/data/sendData",paramMap2);
-            System.out.println("result2 = " + result2);
+//            HashMap<String,Object> paramMap2=new HashMap<>();
+//            paramMap2.put("key","{\"other\":\"label1_22\"}");
+//            paramMap2.put("value","aaa");
+//            String result2=HttpUtil.post("http://localhost:8080/api/data/sendData",paramMap2);
+//            System.out.println("result2 = " + result2);
 
 
-            HashMap<String,Object> paramMap3=new HashMap<>();
-            paramMap3.put("groupId","group4");
-            String result3=HttpUtil.post("http://localhost:8080/api/data/resetOffsetToEarliest",paramMap3);
-            System.out.println("result3 = " + result3);
+//            HashMap<String,Object> paramMap3=new HashMap<>();
+//            paramMap3.put("groupId","group4");
+//            String result3=HttpUtil.post("http://localhost:8080/api/data/resetOffsetToEarliest",paramMap3);
+//            System.out.println("result3 = " + result3);
 
             HashMap<String,Object> paramMap8=new HashMap<>();
             //paramMap8.put("filter","!other.contains(\"label1_\")");
-            paramMap8.put("filter","1==1");
-            paramMap8.put("groupId","group4");
+            //paramMap8.put("filter","1==1");
+            //paramMap8.put("groupId","group4");
             String result8=HttpUtil.post("http://localhost:8080/api/data/recvData",paramMap8);
             System.out.println("result8 = " + result8);
 
