@@ -71,6 +71,7 @@
 同时也支持消息回溯消费已经消息统计查询。
   
 实现了流式消息检索的基本需求。
+![示意图](https://user-images.githubusercontent.com/40593174/227403984-f5bd167b-445f-4652-90f0-f7c065e559d3.png)
 
 ## 联系人：
 有问题可以联系:zhangchuang@iie.ac.cn
