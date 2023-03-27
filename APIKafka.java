@@ -43,8 +43,13 @@ public class APIKafka {
         if(filter == null){filter = "true";}
         if(groupId == null){groupId = "guest";}
 
-        ArrayList<LinkedHashMap<String, Object>> bufferTmp = KafkaUtil.recvFromKafka("producer",groupId);
         ArrayList<LinkedHashMap<String, Object>> buffer = new ArrayList<LinkedHashMap<String, Object>>();
+        ArrayList<LinkedHashMap<String, Object>> bufferTmp  = new ArrayList<LinkedHashMap<String, Object>>();
+        try {
+            bufferTmp = KafkaUtil.recvFromKafka("producer", groupId);
+        } catch (ConcurrentModificationException e) {
+            return new RespValue(0, "请使用单线程消费", buffer);
+        }
 
         long start = System.currentTimeMillis();   //获取开始时间
         for (int i = 0; i < bufferTmp.size(); i++) {
