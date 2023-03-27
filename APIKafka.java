@@ -30,7 +30,10 @@ public class APIKafka {
     @PostMapping("/sendData")
     public RespValue sendMessage(@RequestParam("key")String key,
                                  @RequestParam("value")String value) throws ExecutionException, InterruptedException {
-        KafkaUtil.sendToKafka("producer",key,value);
+        //同步发送
+        //KafkaUtil.sendToKafka("producer",key,value);
+        //异步发送
+        KafkaUtil.sendToKafkaAsync("producer",key,value);
         return new RespValue(0,"插入成功","");
     }
 
