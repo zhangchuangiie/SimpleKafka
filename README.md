@@ -73,5 +73,8 @@
 实现了流式消息检索的基本需求。
 ![示意图](https://user-images.githubusercontent.com/40593174/227403984-f5bd167b-445f-4652-90f0-f7c065e559d3.png)
 
+APIKafka，支持生产者任意标注标签，标签是开放的，可以是任意JSON，Key无需预先定义和Value也不必是枚举值，支持消费者按表达式条件订阅数据，支持开源表达式语言OGNL，包括支持与或非，支持对象取值，支持数组和集合的访问，也支持Java表达式，常用的有contains，startsWith，endsWith，length等，也支持matches正则匹配。可以满足流式消息检索的各种匹配要求。
+
+
 ## 联系人：
 有问题可以联系:zhangchuang@iie.ac.cn
