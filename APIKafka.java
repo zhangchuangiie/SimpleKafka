@@ -19,7 +19,7 @@ import java.util.concurrent.ExecutionException;
 @RequestMapping(value="/data",method = {RequestMethod.GET,RequestMethod.POST})
 public class APIKafka {
 
-    private Object getValue(String expression, JSONObject keyObject) throws OgnlException {
+    private Object getValue(Object expression, JSONObject keyObject) throws OgnlException {
         OgnlContext oc = new OgnlContext();
         oc.setRoot(keyObject);
         Object object = Ognl.getValue(expression, oc, oc.getRoot());
@@ -39,7 +39,7 @@ public class APIKafka {
 
     @PostMapping("/recvData")
     public RespValue recvData(@RequestParam(name="filter",required = false)String filter,
-                              @RequestParam(name="groupId",required = false)String groupId) throws ExecutionException, InterruptedException {
+                              @RequestParam(name="groupId",required = false)String groupId) throws ExecutionException, InterruptedException, OgnlException {
         if(filter == null){filter = "true";}
         if(groupId == null){groupId = "guest";}
 
@@ -50,7 +50,8 @@ public class APIKafka {
         } catch (ConcurrentModificationException e) {
             return new RespValue(0, "请使用单线程消费", buffer);
         }
-
+        Object tree = Ognl.parseExpression(filter);
+        
         long start = System.currentTimeMillis();   //获取开始时间
         for (int i = 0; i < bufferTmp.size(); i++) {
 
@@ -62,7 +63,7 @@ public class APIKafka {
 
             Boolean object = false;
             try {
-                object = (Boolean) getValue(filter,keyObject);
+                object = (Boolean) getValue(tree,keyObject);
             }catch (Exception e){
                 System.out.println("e = " + e);
                 System.out.println("标签不含表达式参数，跳过");
